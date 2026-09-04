@@ -6,7 +6,6 @@ def find_Pythagorean(n):
         for b in range(1, n+1):
             for c in range(1, n+1):
                 if a**2 + b**2 == c**2:
-                    if (a,b,c) not in triples:
                         triples.append((a,b,c))
     return triples
 

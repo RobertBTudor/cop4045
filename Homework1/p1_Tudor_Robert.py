@@ -29,9 +29,10 @@ while True:
     #--- Creating the graph ---
     #Creates the chart using matplotlib. First sort by the amount of roots to choose the domain size (xmin/xmax),
     #Then creates a graph using 150 points. I customized the graph to show all 150 points and made them less thick (similar to the example)
+    #Min and max functions are used to find the true min/max since x1 or x2 could be larger.
     if ((b**2) - (4*a*c)) > 0:
-        xmin = x1 - 5
-        xmax = x2 + 5
+        xmin = min(x1, x2) - 5
+        xmax = max(x1, x2) + 5
 
     elif ((b**2) - (4*a*c)) == 0:
         xmin = x1 - 5
