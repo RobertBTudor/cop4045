@@ -1,0 +1,115 @@
+def caesar_cipher(text, shift):
+    # Create an empty string to store the encrypted message
+    encrypted_text = ""
+
+    # Go through each character in the original message
+    for i in range(len(text)):
+        char = text[i]
+
+        # Check if the character is an uppercase letter
+        if char >= 'A' and char <= 'Z':
+            # Convert the letter to a number from 0-25, shift it,
+            # and use % 26 to wrap around from Z back to A
+            new_position = (ord(char) - ord('A') + shift) % 26
+            encrypted_text += chr(new_position + ord('A'))
+
+        # Check if the character is a lowercase letter
+        elif char >= 'a' and char <= 'z':
+            # Convert the letter to a number from 0-25, shift it,
+            # and use % 26 to wrap around from z back to a
+            new_position = (ord(char) - ord('a') + shift) % 26
+            encrypted_text += chr(new_position + ord('a'))
+
+        else:
+            # Keep spaces and other non-letter characters unchanged
+            encrypted_text += char
+
+    # Return the completed encrypted message
+    return encrypted_text
+
+
+def caesar_decipher(ciphertext, shift):
+    # Decrypting is the same as encrypting with the opposite shift
+    return caesar_cipher(ciphertext, -shift)
+
+
+def letter_frequency(text):
+    # Create a list with 26 zeros, one for each letter of the alphabet
+    frequency = [0] * 26
+
+    # Go through each character in the text
+    for i in range(len(text)):
+        char = text[i].lower()
+
+        # Only count alphabetic characters
+        if char >= 'a' and char <= 'z':
+            # Find the position of the letter in the alphabet
+            position = ord(char) - ord('a')
+
+            # Increase the count for that letter
+            frequency[position] += 1
+
+    # Return the frequency list
+    return frequency
+
+
+def main():
+    # Display the program menu
+    while True:
+        print("\nCaesar Cipher Program")
+        print("1. Enter message")
+        print("2. Encrypt message")
+        print("3. View letter frequencies")
+        print("4. Decrypt message")
+        print("5. Exit")
+
+        # Get the user's menu choice
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            # Ask the user to enter a message
+            text = input("Enter your message: ")
+
+            # Ask the user for the shift value
+            shift = int(input("Enter the shift value: "))
+
+        elif choice == "2":
+            # Make sure a message has been entered
+            try:
+                ciphered_text = caesar_cipher(text, shift)
+                print("Ciphered text:", ciphered_text)
+            except NameError:
+                print("Please enter a message first.")
+
+        elif choice == "3":
+            # Make sure a message has been entered
+            try:
+                frequency = letter_frequency(text)
+
+                # Display the frequency of each letter
+                for i in range(26):
+                    letter = chr(i + ord('a'))
+                    print(letter + ":", frequency[i])
+            except NameError:
+                print("Please enter a message first.")
+
+        elif choice == "4":
+            # Make sure a message has been encrypted first
+            try:
+                deciphered_text = caesar_decipher(ciphered_text, shift)
+                print("Deciphered text:", deciphered_text)
+            except NameError:
+                print("Please encrypt a message first.")
+
+        elif choice == "5":
+            # End the program
+            print("Goodbye!")
+            break
+
+        else:
+            # Handle an invalid menu choice
+            print("Invalid choice. Please try again.")
+
+
+# Start the program
+main()
