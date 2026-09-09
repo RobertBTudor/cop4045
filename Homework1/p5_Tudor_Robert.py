@@ -70,8 +70,13 @@ def main():
             # Ask the user to enter a message
             text = input("Enter your message: ")
 
-            # Ask the user for the shift value
-            shift = int(input("Enter the shift value: "))
+            # Keep asking until the user enters a valid integer
+            while True:
+                try:
+                    shift = int(input("Enter the shift value: "))
+                    break
+                except ValueError:
+                    print("Invalid input. Please enter a whole number.")
 
         elif choice == "2":
             # Make sure a message has been entered
@@ -112,4 +117,6 @@ def main():
 
 
 # Start the program
-main()
+# I changed the code from "main()"" to if __name__ == "__main__" to prevent the unit test from being stuck inside the loop
+if __name__ == "__main__":
+    main()
