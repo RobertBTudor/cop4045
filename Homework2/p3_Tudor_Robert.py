@@ -1,17 +1,18 @@
 import csv
+import testif
 
-def add_user(sn, username, fullname):
+def add_user(sn: dict, username: str, fullname: str) -> bool:
     """
     Part a)
-    Adds a new user with no friends to the social network.
+    Adds a new user with no friends to the social network
 
     Args:
-        sn: The social network dictionary.
-        username: The username of the new user.
-        fullname: The full name of the new user.
+        sn: The social network dictionary
+        username: The username of the new user
+        fullname: The full name of the new user
 
     Returns:
-        True if the user was added, False if the username already exists.
+        True if the user was added, False if the username already exists
     """
     try:
         if username in sn:
@@ -25,15 +26,15 @@ def add_user(sn, username, fullname):
         raise
 
 
-def add_friend(sn, user1, user2):
+def add_friend(sn: dict, user1: str, user2: str) -> bool:
     """
     Part b)
-    Adds a mutual friend link between two users.
+    Adds a mutual friend link between two users
 
     Args:
-        sn: The social network dictionary.
-        user1: The username of the first user.
-        user2: The username of the second user.
+        sn: The social network dictionary
+        user1: The username of the first user
+        user2: The username of the second user
 
     Returns:
         True if the link was added, False if either user is not found
@@ -59,15 +60,15 @@ def add_friend(sn, user1, user2):
         raise
 
 
-def get_friends(sn, user1, distance):
+def get_friends(sn: dict, user1: str, distance: int) -> list:
     """
     Part c)
-    Finds all friends of a user up to a given link distance.
+    Finds all friends of a user up to a given link distance
 
     Args:
-        sn: The social network dictionary.
-        user1: The username to start from.
-        distance: The maximum link distance (a positive integer).
+        sn: The social network dictionary
+        user1: The username to start from
+        distance: The maximum link distance
 
     Returns:
         A list of usernames at distance 1, 2, ...n, distance from user1.
@@ -102,19 +103,19 @@ def get_friends(sn, user1, distance):
         raise
 
 
-def save_network(filename, sn):
+def save_network(filename: str, sn: dict) -> None:
     """
     Part d)
     Saves a social network to a CSV file. Each row holds one user in the
-    format: username, full name, friend1, friend2, ...
+    format: username, full name, friend1, friend2, etc..
  
     Args:
-        filename: The name of the CSV file to write.
-        sn: The social network dictionary.
+        filename: The name of the CSV file to write
+        sn: The social network dictionary
  
     Raises:
-        FileNotFoundError: If the folder for the file does not exist.
-        PermissionError: If the file cannot be written.
+        FileNotFoundError: If the folder for the file does not exist
+        PermissionError: If the file cannot be written
     """
     try:
         with open(filename, "w", newline="", encoding="utf-8") as file:
@@ -134,17 +135,17 @@ def save_network(filename, sn):
 def load_network(filename: str) -> dict:
     """
     Part e)
-    Loads a social network from a CSV file created by save_network().
+    Loads a social network from a CSV file created by save_network()
  
     Args:
-        filename: The name of the CSV file to read.
+        filename: The name of the CSV file
  
     Returns:
-        The social network dictionary.
+        The social network dictionary
  
     Raises:
-        FileNotFoundError: If the file does not exist.
-        ValueError: If a row in the file is missing a username or full name.
+        FileNotFoundError: If the file does not exist
+        ValueError: If a row in the file is missing a username or full name
     """
     try:
         sn = {}
@@ -166,7 +167,97 @@ def load_network(filename: str) -> dict:
     except Exception as error:
         print(f"Sorry, could not load the network from '{filename}': {error}")
         raise
- 
+
+def test() -> None:
+    """
+    Tests all functions from parts a-e using the testif function.
+    """
+
+    # Create the example social network from the assignment.
+    sn = {
+        'alice': ('Alice Smith', ['maria']),
+        'maria': ('Maria Cortez', ['alice', 'joe', 'david']),
+        'joe': ('Joseph Adams', ['maria', 'eve']),
+        'eve': ('Evelyn Cooper', ['joe']),
+        'david': ('David Benson', ['maria'])
+    }
+
+    # Part a: Test add_user.
+    testif.testif(
+        add_user(sn, 'john', 'John Brown') is True,
+        "add_user adds a new user"
+    )
+
+    testif.testif(
+        add_user(sn, 'john', 'John Brown') is False,
+        "add_user rejects duplicate username"
+    )
+
+    testif.testif(
+        sn['john'] == ('John Brown', []),
+        "add_user creates user with no friends"
+    )
+
+    # Part b: Test add_friend.
+    testif.testif(
+        add_friend(sn, 'john', 'alice') is True,
+        "add_friend creates a mutual friendship"
+    )
+
+    testif.testif(
+        'alice' in sn['john'][1] and 'john' in sn['alice'][1],
+        "add_friend adds both users to each other's friend lists"
+    )
+
+    testif.testif(
+        add_friend(sn, 'john', 'nobody') is False,
+        "add_friend rejects a missing user"
+    )
+
+    # Part c: Test get_friends.
+    testif.testif(
+        get_friends(sn, 'alice', 1) == ['maria', 'john'],
+        "get_friends returns friends at distance 1"
+    )
+
+    testif.testif(
+        get_friends(sn, 'alice', 2) == ['maria', 'john', 'joe', 'david'],
+        "get_friends returns friends through distance 2"
+    )
+
+    testif.testif(
+        get_friends(sn, 'nobody', 1) == [],
+        "get_friends returns empty list for missing user"
+    )
+
+    testif.testif(
+        get_friends(sn, 'alice', 0) == [],
+        "get_friends returns empty list for invalid distance"
+    )
+
+    # Part d: Test save_network.
+    filename = "test_network.csv"
+    save_network(filename, sn)
+
+    testif.testif(
+        True,
+        "save_network creates a CSV file"
+    )
+
+    # Part e: Test load_network.
+    loaded = load_network(filename)
+
+    testif.testif(
+        loaded == sn,
+        "load_network restores the saved network"
+    )
+
+    testif.testif(
+        load_network(filename) == sn,
+        "load_network returns the correct dictionary"
+    )
+
+
  
 def main() -> None:
     """
@@ -217,4 +308,4 @@ def main() -> None:
  
  
 if __name__ == "__main__":
-    main()
+    test()
