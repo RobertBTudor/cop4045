@@ -143,6 +143,37 @@ class NVector:
 
 def main() -> None:
     """Test parts a) - i) with the testif function"""
+    # helper functions
+    ok = True
+    try:
+        check_number(5)
+        check_number(2.5)
+    except TypeError:
+        ok = False
+    testif.testif(ok, 'check_number with numbers', 'no error', 'raised TypeError')
+
+    ok = False
+    try:
+        check_number('5')
+    except TypeError:
+        ok = True
+    testif.testif(ok, 'check_number with a string', 'raised TypeError', 'no TypeError')
+
+    ok = True
+    try:
+        check_index(0)
+        check_index(-1)
+    except TypeError:
+        ok = False
+    testif.testif(ok, 'check_index with ints', 'no error', 'raised TypeError')
+
+    ok = False
+    try:
+        check_index(1.0)
+    except TypeError:
+        ok = True
+    testif.testif(ok, 'check_index with a float', 'raised TypeError', 'no TypeError')
+
     # a) constructor with one sequence argument
     a = NVector([3, 0, 1, -1])
     testif.testif(a.elements == [3, 0, 1, -1], 'constructor with a list', 'elements are [3, 0, 1, -1]', 'wrong elements')
@@ -167,6 +198,13 @@ def main() -> None:
         ok = True
     testif.testif(ok, 'constructor with a non-number', 'raised TypeError', 'no TypeError')
 
+    ok = False
+    try:
+        NVector('abc')
+    except TypeError:
+        ok = True
+    testif.testif(ok, 'constructor with a string', 'raised TypeError', 'no TypeError')
+
     # b) constructor with two or more arguments
     b = NVector(3, 0, 1, -1)
     testif.testif(b.elements == [3, 0, 1, -1], 'constructor with 4 arguments', 'elements are [3, 0, 1, -1]', 'wrong elements')
@@ -184,6 +222,20 @@ def main() -> None:
     except IndexError:
         ok = True
     testif.testif(ok, 'getitem out of range', 'raised IndexError', 'no IndexError')
+
+    ok = False
+    try:
+        a[-5]
+    except IndexError:
+        ok = True
+    testif.testif(ok, 'getitem negative out of range', 'raised IndexError', 'no IndexError')
+
+    ok = False
+    try:
+        a[0:2]
+    except TypeError:
+        ok = True
+    testif.testif(ok, 'getitem with a slice', 'raised TypeError', 'no TypeError')
 
     ok = False
     try:
@@ -215,6 +267,7 @@ def main() -> None:
 
     # f) __str__
     testif.testif(str(a) == 'NVector([3, 0, 1, -1])', 'str', str(a), 'got ' + str(a))
+    testif.testif(repr(a) == str(a), 'repr', repr(a), 'got ' + repr(a))
 
     # g) __eq__ and __ne__
     testif.testif(a == b, 'eq with an equal vector', 'a == b', 'a != b')
@@ -255,6 +308,13 @@ def main() -> None:
         ok = True
     testif.testif(ok, 'mul vectors of different lengths', 'raised ValueError', 'no ValueError')
 
+    ok = False
+    try:
+        a * 'x'
+    except TypeError:
+        ok = True
+    testif.testif(ok, 'mul a string', 'raised TypeError', 'no TypeError')
+
     # j) zeros
     z = NVector.zeros(5)
     testif.testif(z == NVector(0, 0, 0, 0, 0), 'zeros', str(z), 'got ' + str(z))
@@ -265,6 +325,15 @@ def main() -> None:
     except ValueError:
         ok = True
     testif.testif(ok, 'zeros with a negative length', 'raised ValueError', 'no ValueError')
+
+    ok = False
+    try:
+        NVector.zeros(2.5)
+    except TypeError:
+        ok = True
+    testif.testif(ok, 'zeros with a float length', 'raised TypeError', 'no TypeError')
+
+    testif.testif(len(NVector.zeros(0)) == 0, 'zeros with length 0', 'empty vector', 'not empty')
 
 
 if __name__ == '__main__':
