@@ -1,3 +1,6 @@
+import testif
+
+
 def check_number(value: object) -> None:
     """Make sure value is a number
 
@@ -139,127 +142,129 @@ class NVector:
 
 
 def main() -> None:
-    """Test every NVector method, including the error cases"""
+    """Test parts a) - i) with the testif function"""
+    # a) constructor with one sequence argument
     a = NVector([3, 0, 1, -1])
-    b = NVector((3, 0, 1, -1))
-    c = NVector(3, 0, 1, -1)
-    print('a =', a, ' b =', b, ' c =', c)
-    print('a == b == c:', a == b and b == c)
-
-    # the vector must not share the list passed to the constructor
+    testif.testif(a.elements == [3, 0, 1, -1], 'constructor with a list', 'elements are [3, 0, 1, -1]', 'wrong elements')
+    t = NVector((3, 0, 1, -1))
+    testif.testif(t.elements == [3, 0, 1, -1], 'constructor with a tuple', 'elements are [3, 0, 1, -1]', 'wrong elements')
     lst = [1, 2, 3]
     v = NVector(lst)
     lst[0] = 100
-    print('v after changing the original list:', v)
+    testif.testif(v.elements == [1, 2, 3], 'constructor copies the list', 'changing the original list does not change the vector', 'the list is shared')
 
-    print('len(a) =', len(a))
-    print('a[1] =', a[1], ' a[-2] =', a[-2])
-
-    x = NVector([3, 0, 1, -1])
-    x[2] = 5
-    print('x after x[2] = 5:', x, x == NVector([3, 0, 5, -1]))
-    x[-1] = 7
-    print('x after x[-1] = 7:', x)
-
-    print('a != x:', a != x, ' a != c:', a != c, ' a == [3, 0, 1, -1]:', a == [3, 0, 1, -1])
-
-    d = NVector([1, 2, 3, 4])
-    print('a + d =', a + d)
-    print('a + 10 =', a + 10)
-    print('10 + a =', 10 + a)
-
-    print('a * d =', a * d)
-    print('a * 2 =', a * 2)
-    print('2 * a =', 2 * a)
-
-    print('zeros(5) =', NVector.zeros(5))
-
-    print()
-    print('Error cases:')
-
+    ok = False
     try:
         NVector(5)
-        print('NVector(5) -> no exception (WRONG)')
-    except TypeError as e:
-        print('NVector(5) -> TypeError:', e)
+    except TypeError:
+        ok = True
+    testif.testif(ok, 'constructor with a scalar', 'raised TypeError', 'no TypeError')
 
-    try:
-        NVector('abc')
-        print("NVector('abc') -> no exception (WRONG)")
-    except TypeError as e:
-        print("NVector('abc') -> TypeError:", e)
-
+    ok = False
     try:
         NVector(1, 'x', 3)
-        print("NVector(1, 'x', 3) -> no exception (WRONG)")
-    except TypeError as e:
-        print("NVector(1, 'x', 3) -> TypeError:", e)
+    except TypeError:
+        ok = True
+    testif.testif(ok, 'constructor with a non-number', 'raised TypeError', 'no TypeError')
 
+    # b) constructor with two or more arguments
+    b = NVector(3, 0, 1, -1)
+    testif.testif(b.elements == [3, 0, 1, -1], 'constructor with 4 arguments', 'elements are [3, 0, 1, -1]', 'wrong elements')
+
+    # c) __len__
+    testif.testif(len(a) == 4, 'len', 'len is 4', 'len is ' + str(len(a)))
+
+    # d) __getitem__
+    testif.testif(a[1] == 0, 'getitem', 'a[1] == 0', 'a[1] == ' + str(a[1]))
+    testif.testif(a[-2] == 1, 'getitem negative index', 'a[-2] == 1', 'a[-2] == ' + str(a[-2]))
+
+    ok = False
     try:
         a[4]
-        print('a[4] -> no exception (WRONG)')
-    except IndexError as e:
-        print('a[4] -> IndexError:', e)
+    except IndexError:
+        ok = True
+    testif.testif(ok, 'getitem out of range', 'raised IndexError', 'no IndexError')
 
-    try:
-        a[-5]
-        print('a[-5] -> no exception (WRONG)')
-    except IndexError as e:
-        print('a[-5] -> IndexError:', e)
-
+    ok = False
     try:
         a['1']
-        print("a['1'] -> no exception (WRONG)")
-    except TypeError as e:
-        print("a['1'] -> TypeError:", e)
+    except TypeError:
+        ok = True
+    testif.testif(ok, 'getitem with a non-int index', 'raised TypeError', 'no TypeError')
 
+    # e) __setitem__
+    x = NVector(3, 0, 1, -1)
+    x[2] = 5
+    testif.testif(x == NVector(3, 0, 5, -1), 'setitem', 'x[2] = 5 gives ' + str(x), 'got ' + str(x))
+    x[-1] = 7
+    testif.testif(x[3] == 7, 'setitem negative index', 'x[-1] = 7 gives ' + str(x), 'got ' + str(x))
+
+    ok = False
     try:
-        a[0:2]
-        print('a[0:2] -> no exception (WRONG)')
-    except TypeError as e:
-        print('a[0:2] -> TypeError:', e)
+        x[10] = 1
+    except IndexError:
+        ok = True
+    testif.testif(ok, 'setitem out of range', 'raised IndexError', 'no IndexError')
 
+    ok = False
     try:
-        a[10] = 1
-        print('a[10] = 1 -> no exception (WRONG)')
-    except IndexError as e:
-        print('a[10] = 1 -> IndexError:', e)
+        x[0] = 'x'
+    except TypeError:
+        ok = True
+    testif.testif(ok, 'setitem with a non-number', 'raised TypeError', 'no TypeError')
 
-    try:
-        a[0] = 'x'
-        print("a[0] = 'x' -> no exception (WRONG)")
-    except TypeError as e:
-        print("a[0] = 'x' -> TypeError:", e)
+    # f) __str__
+    testif.testif(str(a) == 'NVector([3, 0, 1, -1])', 'str', str(a), 'got ' + str(a))
 
+    # g) __eq__ and __ne__
+    testif.testif(a == b, 'eq with an equal vector', 'a == b', 'a != b')
+    testif.testif(not (a == x), 'eq with a different vector', 'a == x is False', 'a == x is True')
+    testif.testif(not (a == [3, 0, 1, -1]), 'eq with a list', 'a == list is False', 'a == list is True')
+    testif.testif(a != x, 'ne with a different vector', 'a != x', 'a != x is False')
+    testif.testif(not (a != b), 'ne with an equal vector', 'a != b is False', 'a != b is True')
+
+    # h) __add__ and __radd__
+    d = NVector(1, 2, 3, 4)
+    testif.testif(a + d == NVector(4, 2, 4, 3), 'add two vectors', str(a + d), 'got ' + str(a + d))
+    testif.testif(a + 10 == NVector(13, 10, 11, 9), 'add a number', str(a + 10), 'got ' + str(a + 10))
+    testif.testif(10 + a == NVector(13, 10, 11, 9), 'radd a number', str(10 + a), 'got ' + str(10 + a))
+
+    ok = False
     try:
         a + NVector(1, 2)
-        print('a + NVector(1, 2) -> no exception (WRONG)')
-    except ValueError as e:
-        print('a + NVector(1, 2) -> ValueError:', e)
+    except ValueError:
+        ok = True
+    testif.testif(ok, 'add vectors of different lengths', 'raised ValueError', 'no ValueError')
 
+    ok = False
     try:
         a + 'x'
-        print("a + 'x' -> no exception (WRONG)")
-    except TypeError as e:
-        print("a + 'x' -> TypeError:", e)
+    except TypeError:
+        ok = True
+    testif.testif(ok, 'add a string', 'raised TypeError', 'no TypeError')
 
+    # i) __mul__ and __rmul__
+    testif.testif(a * d == 2, 'mul two vectors', 'a * d == 2', 'got ' + str(a * d))
+    testif.testif(a * 2 == 6, 'mul a number', 'a * 2 == 6', 'got ' + str(a * 2))
+    testif.testif(2 * a == 6, 'rmul a number', '2 * a == 6', 'got ' + str(2 * a))
+
+    ok = False
     try:
         a * NVector(1, 2)
-        print('a * NVector(1, 2) -> no exception (WRONG)')
-    except ValueError as e:
-        print('a * NVector(1, 2) -> ValueError:', e)
+    except ValueError:
+        ok = True
+    testif.testif(ok, 'mul vectors of different lengths', 'raised ValueError', 'no ValueError')
 
+    # j) zeros
+    z = NVector.zeros(5)
+    testif.testif(z == NVector(0, 0, 0, 0, 0), 'zeros', str(z), 'got ' + str(z))
+
+    ok = False
     try:
         NVector.zeros(-1)
-        print('NVector.zeros(-1) -> no exception (WRONG)')
-    except ValueError as e:
-        print('NVector.zeros(-1) -> ValueError:', e)
-
-    try:
-        NVector.zeros(2.5)
-        print('NVector.zeros(2.5) -> no exception (WRONG)')
-    except TypeError as e:
-        print('NVector.zeros(2.5) -> TypeError:', e)
+    except ValueError:
+        ok = True
+    testif.testif(ok, 'zeros with a negative length', 'raised ValueError', 'no ValueError')
 
 
 if __name__ == '__main__':
