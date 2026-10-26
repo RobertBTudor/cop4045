@@ -400,4 +400,7 @@ def main(predator_breed_time: int = 6, predator_starve_time: int = 3, initial_pr
 
 
 if __name__ == '__main__':
-    main()
+    main(predator_starve_time=8, predator_breed_time=4,
+     human_hunt_time=6, human_starve_time=30, human_breed_time=15, initial_humans=3)
+
+
