@@ -18,6 +18,20 @@ def draw_leaf_straight(level: int, length: float) -> None:
         draw_leaf_straight(level - 1, length * 0.85)
     turtle.backward(length)
 
+def draw_leaf_curved(level: int, length: float) -> None:
+    turtle.forward(length)
+    if level > 0:
+        turtle.left(45)
+        draw_leaf_curved(level - 1, length * 0.35)
+        turtle.right(90)
+        draw_leaf_curved(level - 1, length * 0.35)
+        turtle.left(45)
+        turtle.right(15)
+        draw_leaf_curved(level - 1, length * 0.85)
+        turtle.left(15)
+    turtle.backward(length)
+
+
 
 def setup_turtle() -> None:
     """Turn off the animation delay and move the turtle to the bottom, facing up"""
@@ -33,7 +47,7 @@ def setup_turtle() -> None:
 def main() -> None:
     """Draw the leaf"""
     setup_turtle()
-    draw_leaf_straight(6, 120)
+    draw_leaf_straight(8, 120)
     turtle.done()
 
 
