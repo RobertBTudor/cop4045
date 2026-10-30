@@ -47,7 +47,7 @@ def setup_turtle() -> None:
 def main() -> None:
     """Draw the leaf"""
     setup_turtle()
-    draw_leaf_straight(8, 120)
+    draw_leaf_curved(6, 120)
     turtle.done()
 
 

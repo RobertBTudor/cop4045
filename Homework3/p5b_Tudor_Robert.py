@@ -4,7 +4,7 @@ DIGITS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 
 def strB(n: int, base: int = 10) -> str:
-    """Return n as a string in the given base, digits over 9 use 'A'-'Z'
+    """Return n as a string in the given base, digits over 9 use A-Z
 
     Parameters: n - the number to convert; base - the base to convert to
     Precondition: n >= 0 and 2 <= base <= 26
