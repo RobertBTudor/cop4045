@@ -131,7 +131,7 @@ class Island (object):
             for y in range(self.grid_size):
                 animal = self.animal(x,y)
                 if animal:
-                    if isinstance(animal,Predator) and not isinstance(animal,Human):
+                    if isinstance(animal,Predator):
                         count+=1
         return count
 
@@ -223,6 +223,25 @@ class Animal(object):
         '''Reset the moved flag for the next turn'''
         self.moved=False
 
+    def hunt(self, food_type: type) -> None:
+        '''Look for one of the 8 locations with a food_type animal. If found
+        move to that location, remove the food and reset the starve clock
+
+        Parameters: food_type - the class of animal to eat
+        Precondition: the animal has a starve_clock and starve_time and has not moved this turn
+        '''
+        location = self.check_grid(food_type)
+        if location:
+            # print('Eating: pred at {},{}, prey at {},{}'.format( \
+            #     self.x,self.y,location[0],location[1]))
+            self.island.remove(self.island.animal(location[0],location[1]))
+            self.island.remove(self)
+            self.x=location[0]
+            self.y=location[1]
+            self.island.register(self)
+            self.starve_clock=self.starve_time
+            self.moved=True
+
 
 class Prey(Animal):
     """Prey just moves and breeds"""
@@ -272,33 +291,14 @@ class Predator(Animal):
             # print('Death, Predator at {},{}'.format(self.x,self.y))
             self.island.remove(self)
 
-    def hunt(self, food_type: type) -> None:
-        '''Look for one of the 8 locations with a food_type animal. If found
-        move to that location, remove the food and reset the starve clock
-
-        Parameters: food_type - the class of animal to eat
-        Precondition: the predator has not moved this turn
-        '''
-        location = self.check_grid(food_type)
-        if location:
-            # print('Eating: pred at {},{}, prey at {},{}'.format( \
-            #     self.x,self.y,location[0],location[1]))
-            self.island.remove(self.island.animal(location[0],location[1]))
-            self.island.remove(self)
-            self.x=location[0]
-            self.y=location[1]
-            self.island.register(self)
-            self.starve_clock=self.starve_time
-            self.moved=True
-
     def eat(self) -> None:
         '''Predator hunts for Prey if it hasn't moved yet this turn'''
         if not self.moved:
             self.hunt(Prey)
 
 
-class Human(Predator):
-    """A human is a predator that hunts predators every hunt_time ticks and does not kill prey"""
+class Human(Animal):
+    """A human is an animal that hunts predators every hunt_time ticks and does not kill prey"""
 
     def __init__(self, island: Island, x: int = 0, y: int = 0, s: str = "H") -> None:
         '''Create a human at (x,y) and start its breed, starve and hunt clocks
@@ -306,7 +306,9 @@ class Human(Predator):
         Parameters: island - the island it lives on; x, y - its position; s - its symbol
         Precondition: Human.breed_time, starve_time and hunt_time are set in main
         '''
-        super().__init__(island,x,y,s)
+        Animal.__init__(self,island,x,y,s)
+        self.breed_clock = self.breed_time
+        self.starve_clock = self.starve_time
         self.hunt_clock = self.hunt_time
 
     def clock_tick(self) -> None:
@@ -314,8 +316,11 @@ class Human(Predator):
 
         Postcondition: the human is removed from the island if it starved
         '''
+        self.breed_clock -= 1
+        self.starve_clock -= 1
         self.hunt_clock -= 1
-        super().clock_tick()
+        if self.starve_clock <= 0:
+            self.island.remove(self)
 
     def eat(self) -> None:
         '''Every hunt_time ticks, hunt for a Predator next to the human
@@ -371,7 +376,7 @@ def main(predator_breed_time: int = 6, predator_starve_time: int = 3, initial_pr
             for y in range(size):
                 animal = isle.animal(x,y)
                 if animal:
-                    if isinstance(animal,Predator):
+                    if isinstance(animal,(Predator,Human)):
                         animal.eat()
                     animal.move()
                     animal.breed()
