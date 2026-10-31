@@ -12,7 +12,8 @@ def make_pairs(seq1: list, seq2: list, acc: list = []) -> list[tuple]:
     return make_pairs(seq1[1:], seq2[1:], acc + [(seq1[0], seq2[0])])
 
 
-def test_make_pairs():
+def test_make_pairs() -> None:
+    """Test make_pairs with same length, different length and empty lists"""
     testif(make_pairs([1, 2, 3], [4, 5, 6]) == [(1, 4), (2, 5), (3, 6)], 'make_pairs same length',
            'got [(1, 4), (2, 5), (3, 6)]', 'expected [(1, 4), (2, 5), (3, 6)]')
     testif(make_pairs([1, 2, 3], [4, 5]) == [(1, 4), (2, 5)], 'make_pairs seq2 shorter',

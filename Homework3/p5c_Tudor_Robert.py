@@ -16,7 +16,8 @@ def Cnk_m(n: int, k: int) -> int:
     return memo[(n, k)]
 
 
-def test_Cnk_m():
+def test_Cnk_m() -> None:
+    """Test Cnk_m with k = 0, small, middle and big cases"""
     testif(Cnk_m(5, 0) == 1, 'Cnk_m k is 0', 'got 1', 'expected 1')
     testif(Cnk_m(5, 2) == 10, 'Cnk_m small', 'got 10', 'expected 10')
     testif(Cnk_m(20, 10) == 184756, 'Cnk_m middle', 'got 184756', 'expected 184756')

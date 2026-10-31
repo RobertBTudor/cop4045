@@ -19,6 +19,12 @@ def draw_leaf_straight(level: int, length: float) -> None:
     turtle.backward(length)
 
 def draw_leaf_curved(level: int, length: float) -> None:
+    """Draw a recursive leaf that bends 15 degrees right at each level
+
+    Parameters: level - the recursion level; length - the length of the lower stem
+    Precondition: level >= 0 and length > 0
+    Postcondition: the turtle ends where it started, facing the same way
+    """
     turtle.forward(length)
     if level > 0:
         turtle.left(45)

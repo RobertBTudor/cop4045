@@ -14,7 +14,8 @@ def strB(n: int, base: int = 10) -> str:
     return strB(n // base, base) + DIGITS[n % base]
 
 
-def test_strB():
+def test_strB() -> None:
+    """Test strB with zero, base 10 and base 16 cases"""
     testif(strB(0) == '0', 'strB zero', 'got 0', 'expected 0')
     testif(strB(1234, base=10) == '1234', 'strB base 10', 'got 1234', 'expected 1234')
     testif(strB(8191, base=16) == '1FFF', 'strB base 16 letters', 'got 1FFF', 'expected 1FFF')
