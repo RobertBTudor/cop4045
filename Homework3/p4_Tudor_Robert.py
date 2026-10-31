@@ -22,7 +22,7 @@ def ed_read(filename: str, from_: int = 0, to: int = -1) -> str:
 
 
 def ed_find(filename: str, search_str: str) -> list[int]:
-    """Return a list of every position where search_str is found in the file
+    """Return a list of every position where search_str is found in the file, not counting overlaps
 
     Parameters: filename - the file to search; search_str - the string to look for
     Precondition: the file exists and search_str isnt empty
@@ -37,7 +37,7 @@ def ed_find(filename: str, search_str: str) -> list[int]:
     pos = text.find(search_str)
     while pos != -1:
         positions.append(pos)
-        pos = text.find(search_str, pos + 1)
+        pos = text.find(search_str, pos + len(search_str))
     return positions
 
 
@@ -75,10 +75,11 @@ def ed_append(filename: str, string: str) -> int:
     """Add string to the end of the file and return how many characters were written
 
     Parameters: filename - the file to add to, its created if it doesnt exist; string - the text to add
-    Precondition: string is a str
-    Postcondition: string is at the end of the file
-    File errors get passed to the caller
+    Postcondition: string is at the end of the file, the file doesnt change if there's an error
+    Raises TypeError if string isnt a str, file errors get passed to the caller
     """
+    if not isinstance(string, str):
+        raise TypeError('string must be a str')
     with open(filename, 'a') as f:
         return f.write(string)
 
@@ -100,7 +101,7 @@ def test_ed_find() -> None:
     testif(ed_find(fn, '356') == [], 'ed_find not found', 'got []', 'expected []')
     testif(ed_find(fn, '0123') == [0, 10], 'ed_find at the start', 'got [0, 10]', 'expected [0, 10]')
     reset_file(fn, 'aaaa')
-    testif(ed_find(fn, 'aa') == [0, 1, 2], 'ed_find overlapping', 'got [0, 1, 2]', 'expected [0, 1, 2]')
+    testif(ed_find(fn, 'aa') == [0, 2], 'ed_find no overlaps', 'got [0, 2]', 'expected [0, 2]')
     try:
         ed_find(fn, '')
         testif(False, 'ed_find empty string', '', 'no ValueError raised')
