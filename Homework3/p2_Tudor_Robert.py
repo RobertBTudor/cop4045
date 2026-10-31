@@ -12,7 +12,11 @@ class ParkingPermit:
         self.fees = fees
 
     def cost(self) -> float:
-        """Return the base cost: months * the monthly fee"""
+        """Return the base cost: months * the monthly fee
+
+        Precondition: months >= 0 and fees has a 'monthly' key
+        Postcondition: returns months * fees['monthly'], the permit is not changed
+        """
         return self.months * self.fees['monthly']
 
     def __str__(self) -> str:
@@ -37,7 +41,12 @@ class StudentPermit(ParkingPermit):
         self.vehicles = vehicles
 
     def cost(self) -> float:
-        """Return the monthly cost plus a one-time fee for each vehicle after the first"""
+        """Return the monthly cost plus a one-time fee for each vehicle after the first
+
+        Precondition: vehicles >= 1 and fees has 'monthly' and 'extra_vehicle' keys
+        Postcondition: returns months * fees['monthly'] + (vehicles - 1) * fees['extra_vehicle'],
+        the permit is not changed
+        """
         extra_vehicles = max(self.vehicles - 1, 0)
         return super().cost() + extra_vehicles * self.fees['extra_vehicle']
 
@@ -65,7 +74,12 @@ class FacultyPermit(ParkingPermit):
         self.garage = garage
 
     def cost(self) -> float:
-        """Return the monthly cost plus the monthly garage fee if garage access is included"""
+        """Return the monthly cost plus the monthly garage fee if garage access is included
+
+        Precondition: months >= 0 and fees has 'monthly' and 'garage' keys
+        Postcondition: returns months * fees['monthly'], plus months * fees['garage'] if garage is True,
+        the permit is not changed
+        """
         total = super().cost()
         if self.garage:
             total += self.months * self.fees['garage']
@@ -86,8 +100,21 @@ class FacultyPermit(ParkingPermit):
                 + repr(self.fees) + ', ' + str(self.garage) + ')')
 
 
+def summarize_list(permits: list[ParkingPermit]) -> float:
+    """Print each owner's name and permit cost, then return the total revenue
+
+    Parameters: permits - a mixed list of permits
+    Precondition: every item in permits is a ParkingPermit (or subclass)
+    """
+    total = 0
+    for permit in permits:
+        print(permit)
+        total += permit.cost()
+    return total
+
+
 def main() -> None:
-    """Create a few permits and print them"""
+    """Create a few permits, print them, then summarize the list"""
     student_fees = {'monthly': 25, 'extra_vehicle': 10}
     faculty_fees = {'monthly': 40, 'garage': 15}
 
@@ -99,8 +126,12 @@ def main() -> None:
     ]
 
     for permit in permits:
-        print(permit)
         print(repr(permit))
+
+    print()
+    total = summarize_list(permits)
+    print('Total revenue: $' + str(total))
+    print('z23818028')
 
 
 if __name__ == '__main__':
