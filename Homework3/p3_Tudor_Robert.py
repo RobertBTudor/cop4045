@@ -1,6 +1,6 @@
 # Copyright 2017, 2013, 2011 Pearson Education, Inc., W.F. Punch & R.J.Enbody
 """Predator-Prey Simulation
-four classes are defined: animal, predator, prey, and island
+five classes are defined: animal, predator, prey, human, and island
 where island is where the simulation is taking place,
 i.e. where the predator and prey interact (live).
 A list of predators and prey are instantiated, and
@@ -63,7 +63,7 @@ class Island (object):
                 count += 1
                 self.register(new_human)
 
-    def clear_all_moved_flags(self):
+    def clear_all_moved_flags(self) -> None:
         ''' Animals have a moved flag to indicated they moved this turn.
         Clear that so we can do the next turn
         '''
@@ -72,12 +72,12 @@ class Island (object):
                 if self.grid[x][y]:
                     self.grid[x][y].clear_moved_flag()
 
-    def size(self):
+    def size(self) -> int:
         '''Return size of the island: one dimension.
         '''
         return self.grid_size
 
-    def register(self,animal):
+    def register(self, animal: 'Animal') -> None:
         '''Register animal with island, i.e. put it at the
         animal's coordinates
         '''
@@ -85,20 +85,20 @@ class Island (object):
         y = animal.y
         self.grid[x][y] = animal
 
-    def remove(self,animal):
+    def remove(self, animal: 'Animal') -> None:
         '''Remove animal from island.'''
         x = animal.x
         y = animal.y
         self.grid[x][y] = 0
 
-    def animal(self,x,y):
-        '''Return animal at location (x,y)'''
+    def animal(self, x: int, y: int) -> 'Animal | int':
+        '''Return animal at location (x,y), 0 if empty, -1 if off the island'''
         if 0 <= x < self.grid_size and 0 <= y < self.grid_size:
             return self.grid[x][y]
         else:
             return -1  # outside island boundary
 
-    def __str__(self):
+    def __str__(self) -> str:
         '''String representation for printing.
            (0,0) will be in the lower left corner.
         '''
@@ -113,7 +113,7 @@ class Island (object):
             s+="\n"
         return s
 
-    def count_prey(self):
+    def count_prey(self) -> int:
         ''' count all the prey on the island'''
         count = 0
         for x in range(self.grid_size):
@@ -124,14 +124,14 @@ class Island (object):
                         count+=1
         return count
 
-    def count_predators(self):
+    def count_predators(self) -> int:
         ''' count all the predators on the island'''
         count = 0
         for x in range(self.grid_size):
             for y in range(self.grid_size):
                 animal = self.animal(x,y)
                 if animal:
-                    if isinstance(animal,Predator):
+                    if isinstance(animal,Predator) and not isinstance(animal,Human):
                         count+=1
         return count
 
@@ -148,8 +148,12 @@ class Island (object):
 
 
 class Animal(object):
-    def __init__(self, island, x=0, y=0, s="A"):
-        '''Initialize the animal's and their positions
+    """An animal on the island that can move and breed"""
+
+    def __init__(self, island: Island, x: int = 0, y: int = 0, s: str = "A") -> None:
+        '''Create an animal at (x,y)
+
+        Parameters: island - the island it lives on; x, y - its position; s - its symbol
         '''
         self.island = island
         self.name = s
@@ -157,18 +161,21 @@ class Animal(object):
         self.y = y
         self.moved=False
 
-    def position(self):
+    def position(self) -> tuple[int, int]:
         '''Return coordinates of current position.
         '''
         return self.x, self.y
 
-    def __str__(self):
+    def __str__(self) -> str:
+        '''Return the animal's symbol'''
         return self.name
 
-    def check_grid(self,type_looking_for=int):
+    def check_grid(self, type_looking_for: type = int) -> tuple[int, int] | int:
         ''' Look in the 8 directions from the animal's location
         and return the first location that presently has an object
         of the specified type. Return 0 if no such location exists
+
+        Parameters: type_looking_for - the exact type to find (int means an empty cell)
         '''
         # neighbor offsets
         offset = [(-1,1),(0,1),(1,1),(-1,0),(1,0),(-1,-1),(0,-1),(1,-1)]
@@ -184,7 +191,7 @@ class Animal(object):
                 break
         return result
 
-    def move(self):
+    def move(self) -> None:
         '''Move to an open, neighboring position '''
         if not self.moved:
             location = self.check_grid(int)
@@ -197,9 +204,11 @@ class Animal(object):
                 self.island.register(self) # register new coordinates
                 self.moved=True
 
-    def breed(self):
+    def breed(self) -> None:
         ''' Breed a new Animal.If there is room in one of the 8 locations
         place the new Prey there. Otherwise you have to wait.
+
+        Precondition: the subclass sets breed_clock and breed_time
         '''
         if self.breed_clock <= 0:
             location = self.check_grid(int)
@@ -210,17 +219,25 @@ class Animal(object):
                 new_animal = the_class(self.island,x=location[0],y=location[1])
                 self.island.register(new_animal)
 
-    def clear_moved_flag(self):
+    def clear_moved_flag(self) -> None:
+        '''Reset the moved flag for the next turn'''
         self.moved=False
 
 
 class Prey(Animal):
-    def __init__(self, island, x=0,y=0,s="O"):
+    """Prey just moves and breeds"""
+
+    def __init__(self, island: Island, x: int = 0, y: int = 0, s: str = "O") -> None:
+        '''Create a prey at (x,y) and start its breed clock
+
+        Parameters: island, x, y, s - same as Animal
+        Precondition: Prey.breed_time is set in main
+        '''
         Animal.__init__(self,island,x,y,s)
         self.breed_clock = self.breed_time
         # print('Init Prey {},{}, breed:{}'.format(self.x, self.y,self.breed_clock))
 
-    def clock_tick(self):
+    def clock_tick(self) -> None:
         '''Prey only updates its local breed clock
         '''
         self.breed_clock -= 1
@@ -228,15 +245,24 @@ class Prey(Animal):
 
 
 class Predator(Animal):
-    def __init__(self, island, x=0,y=0,s="X"):
+    """A predator eats prey and dies if it starves"""
+
+    def __init__(self, island: Island, x: int = 0, y: int = 0, s: str = "X") -> None:
+        '''Create a predator at (x,y) and start its breed and starve clocks
+
+        Parameters: island, x, y, s - same as Animal
+        Precondition: breed_time and starve_time are set in main
+        '''
         Animal.__init__(self,island,x,y,s)
         self.starve_clock = self.starve_time
         self.breed_clock = self.breed_time
         # print('Init Predator {},{}, starve:{}, breed:{}'.format( \
         #     self.x,self.y,self.starve_clock,self.breed_clock))
 
-    def clock_tick(self):
+    def clock_tick(self) -> None:
         ''' Predator updates both breeding and starving
+
+        Postcondition: the predator is removed from the island if it starved
         '''
         self.breed_clock -= 1
         self.starve_clock -= 1
@@ -246,26 +272,33 @@ class Predator(Animal):
             # print('Death, Predator at {},{}'.format(self.x,self.y))
             self.island.remove(self)
 
-    def eat(self):
-        ''' Predator looks for one of the 8 locations with Prey. If found
-        moves to that location, updates the starve clock, removes the Prey
+    def hunt(self, food_type: type) -> None:
+        '''Look for one of the 8 locations with a food_type animal. If found
+        move to that location, remove the food and reset the starve clock
+
+        Parameters: food_type - the class of animal to eat
+        Precondition: the predator has not moved this turn
         '''
+        location = self.check_grid(food_type)
+        if location:
+            # print('Eating: pred at {},{}, prey at {},{}'.format( \
+            #     self.x,self.y,location[0],location[1]))
+            self.island.remove(self.island.animal(location[0],location[1]))
+            self.island.remove(self)
+            self.x=location[0]
+            self.y=location[1]
+            self.island.register(self)
+            self.starve_clock=self.starve_time
+            self.moved=True
+
+    def eat(self) -> None:
+        '''Predator hunts for Prey if it hasn't moved yet this turn'''
         if not self.moved:
-            location = self.check_grid(Prey)
-            if location:
-                # print('Eating: pred at {},{}, prey at {},{}'.format( \
-                #     self.x,self.y,location[0],location[1]))
-                self.island.remove(self.island.animal(location[0],location[1]))
-                self.island.remove(self)
-                self.x=location[0]
-                self.y=location[1]
-                self.island.register(self)
-                self.starve_clock=self.starve_time
-                self.moved=True
+            self.hunt(Prey)
 
 
-class Human(Animal):
-    """A human moves and breeds like an animal, hunts predators and does not kill prey"""
+class Human(Predator):
+    """A human is a predator that hunts predators every hunt_time ticks and does not kill prey"""
 
     def __init__(self, island: Island, x: int = 0, y: int = 0, s: str = "H") -> None:
         '''Create a human at (x,y) and start its breed, starve and hunt clocks
@@ -273,9 +306,7 @@ class Human(Animal):
         Parameters: island - the island it lives on; x, y - its position; s - its symbol
         Precondition: Human.breed_time, starve_time and hunt_time are set in main
         '''
-        Animal.__init__(self,island,x,y,s)
-        self.breed_clock = self.breed_time
-        self.starve_clock = self.starve_time
+        super().__init__(island,x,y,s)
         self.hunt_clock = self.hunt_time
 
     def clock_tick(self) -> None:
@@ -283,29 +314,17 @@ class Human(Animal):
 
         Postcondition: the human is removed from the island if it starved
         '''
-        self.breed_clock -= 1
-        self.starve_clock -= 1
         self.hunt_clock -= 1
-        if self.starve_clock <= 0:
-            self.island.remove(self)
+        super().clock_tick()
 
     def eat(self) -> None:
-        '''Every hunt_time ticks, look for a Predator next to the human. If found
-        move to that location, remove the Predator and reset the starve clock
+        '''Every hunt_time ticks, hunt for a Predator next to the human
 
         Postcondition: the hunt clock is reset when it is time to hunt
         '''
         if not self.moved and self.hunt_clock <= 0:
             self.hunt_clock = self.hunt_time
-            location = self.check_grid(Predator)
-            if location:
-                self.island.remove(self.island.animal(location[0],location[1]))
-                self.island.remove(self)
-                self.x=location[0]
-                self.y=location[1]
-                self.island.register(self)
-                self.starve_clock=self.starve_time
-                self.moved=True
+            self.hunt(Predator)
 
 
 ###########################################
@@ -352,7 +371,7 @@ def main(predator_breed_time: int = 6, predator_starve_time: int = 3, initial_pr
             for y in range(size):
                 animal = isle.animal(x,y)
                 if animal:
-                    if isinstance(animal,Predator) or isinstance(animal,Human):
+                    if isinstance(animal,Predator):
                         animal.eat()
                     animal.move()
                     animal.breed()
